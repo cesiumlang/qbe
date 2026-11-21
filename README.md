@@ -10,7 +10,7 @@ A mirror of [QBE](https://c9x.me/compile/), the compiler backend, from its upstr
 
 ## Sync
 
-The **Sync** workflow (`.github/workflows/sync.yml`) runs nightly and by hand (`gh workflow run sync.yml -R cesiumlang/qbe`). It fetches upstream's `master` and tags, trying `https://c9x.me/git/qbe.git` and then `git://c9x.me/qbe.git`, and pushes what is new. It fails when upstream cannot be reached, or when upstream rewrote `master` or moved a tag; rulesets refuse force pushes to `main` and `master` and changes to tags in any case.
+The **Sync** workflow (`.github/workflows/sync.yml`) runs nightly and by hand (`gh workflow run sync.yml -R cesiumlang/qbe`). It fetches upstream's `master` and tags, trying `git://c9x.me/qbe.git` and then `https://c9x.me/git/qbe.git`, and pushes what is new. It fails when upstream cannot be reached, or when upstream rewrote `master` or moved a tag; rulesets refuse force pushes to `main` and `master` and changes to tags in any case.
 
 GitHub disables scheduled workflows in a public repository after 60 days without activity. When upstream is quiet that long, enable it again: `gh workflow enable sync.yml -R cesiumlang/qbe`.
 

@@ -23,8 +23,8 @@ defaults:
     shell: bash
 
 env:
-  # HTTPS lists refs but has answered fetches with 500, so git:// is the fallback
-  UPSTREAMS: https://c9x.me/git/qbe.git git://c9x.me/qbe.git
+  # HTTPS lists refs but has answered fetches with 500, so it is the fallback
+  UPSTREAMS: git://c9x.me/qbe.git https://c9x.me/git/qbe.git
 
 jobs:
   sync:
