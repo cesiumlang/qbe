@@ -1,0 +1,57 @@
+name: Sync
+
+# Mirrors upstream QBE's master and tags into this repository, unchanged,
+# nightly and by hand. Fast-forward only: a rewritten master or a moved tag
+# upstream fails the run, and nothing already mirrored changes (the rulesets
+# refuse it as well). main is the mirror's own branch; upstream never reaches
+# it. A run with nothing new pushes nothing.
+
+on:
+  schedule:
+    - cron: '17 4 * * *'   # nightly, 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # HTTPS lists refs but has answered fetches with 500, so git:// is the fallback
+  UPSTREAMS: https://c9x.me/git/qbe.git git://c9x.me/qbe.git
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Fetch upstream
+        run: |
+          git init --quiet --bare src.git
+          for i in 1 2 3; do
+            for url in $UPSTREAMS; do
+              if git -C src.git fetch --quiet --no-tags "$url" \
+                  'refs/heads/master:refs/heads/master' 'refs/tags/*:refs/tags/*'; then
+                echo "fetched $url"
+                git -C src.git show-ref
+                exit 0
+              fi
+              echo "::warning::could not fetch $url"
+            done
+            sleep $((i * 60))
+          done
+          echo "::error::upstream QBE could not be reached"
+          exit 1
+
+      # no + and no --prune: only new commits and new tags go out
+      - name: Push new commits and tags
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          git -C src.git push "https://x-access-token:$TOKEN@github.com/$GITHUB_REPOSITORY.git" \
+            'refs/heads/master:refs/heads/master' 'refs/tags/*:refs/tags/*'
